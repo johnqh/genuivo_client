@@ -46,11 +46,7 @@ export function useChat(
     [baseUrl, networkClient]
   );
 
-  const mutation = useMutation<
-    BaseResponse<ChatResponse>,
-    Error,
-    ChatRequest
-  >({
+  const mutation = useMutation<BaseResponse<ChatResponse>, Error, ChatRequest>({
     mutationFn: async (data: ChatRequest) => {
       if (!userId || !token) {
         throw new Error('Not authenticated');
