@@ -1,6 +1,8 @@
 import type { NetworkClient } from '@sudobility/types';
 import type {
   BaseResponse,
+  ChatRequest,
+  ChatResponse,
   History,
   HistoryCreateRequest,
   HistoryTotalResponse,
@@ -232,6 +234,29 @@ export class StarterClient {
       headers: createAuthHeaders(token),
     });
     return validateResponse<null>(response.data, 'deleteHistory');
+  }
+
+  // --- Chat ---
+
+  /**
+   * Sends a chat request to the AI endpoint.
+   *
+   * @param userId - The Firebase UID of the user
+   * @param data - The chat request containing the user's message
+   * @param token - A valid Firebase ID token for authentication
+   * @returns The AI response (GenUI IRenderable) wrapped in a {@link BaseResponse}
+   * @throws {Error} If the response does not match the expected shape
+   */
+  async chat(
+    userId: string,
+    data: ChatRequest,
+    token: FirebaseIdToken
+  ): Promise<BaseResponse<ChatResponse>> {
+    const url = buildUrl(this.baseUrl, `/api/v1/users/${userId}/chat`);
+    const response = await this.networkClient.post(url, data, {
+      headers: createAuthHeaders(token),
+    });
+    return validateResponse<ChatResponse>(response.data, 'chat');
   }
 
   // --- Total (public) ---
