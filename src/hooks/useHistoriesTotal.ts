@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import type { NetworkClient, Optional } from '@sudobility/genuivo_types';
-import { StarterClient } from '../network/StarterClient';
+import type { Optional } from '@sudobility/genuivo_types';
+import { getStarterClient } from '../network/client-singleton';
 import { DEFAULT_GC_TIME, DEFAULT_STALE_TIME, QUERY_KEYS } from '../types';
 
 /**
@@ -22,40 +22,16 @@ export interface UseHistoriesTotalReturn {
  * TanStack Query hook that fetches the global total count of all histories.
  *
  * This uses a public endpoint and does not require authentication.
- * Automatically manages caching and background refetching.
+ * Uses the StarterClient DI singleton (must be initialized at app startup).
  *
- * @param networkClient - A {@link NetworkClient} implementation for HTTP requests
- * @param baseUrl - The base URL of the Starter API
  * @param options - Optional configuration
  * @param options.enabled - Whether the query should execute (default: `true`)
  * @returns An object containing the total count, loading state, error, and refetch function
- *
- * @example
- * ```typescript
- * import { useHistoriesTotal } from '@sudobility/genuivo_client';
- *
- * function TotalDisplay() {
- *   const { total, isLoading } = useHistoriesTotal(
- *     networkClient,
- *     'https://api.example.com'
- *   );
- *
- *   if (isLoading) return <Loading />;
- *   return <span>Total: {total}</span>;
- * }
- * ```
  */
-export const useHistoriesTotal = (
-  networkClient: NetworkClient,
-  baseUrl: string,
-  options?: { enabled?: boolean }
-): UseHistoriesTotalReturn => {
+export const useHistoriesTotal = (options?: {
+  enabled?: boolean;
+}): UseHistoriesTotalReturn => {
   const enabled = options?.enabled ?? true;
-
-  const client = useMemo(
-    () => new StarterClient({ baseUrl, networkClient }),
-    [baseUrl, networkClient]
-  );
 
   const {
     data,
@@ -65,7 +41,7 @@ export const useHistoriesTotal = (
   } = useQuery({
     queryKey: QUERY_KEYS.historiesTotal(),
     queryFn: async () => {
-      const response = await client.getHistoriesTotal();
+      const response = await getStarterClient().getHistoriesTotal();
       if (!response.success || !response.data) {
         throw new Error(response.error || 'Failed to fetch total');
       }

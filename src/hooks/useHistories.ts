@@ -5,11 +5,10 @@ import type {
   History,
   HistoryCreateRequest,
   HistoryUpdateRequest,
-  NetworkClient,
   Optional,
 } from '@sudobility/genuivo_types';
 import type { FirebaseIdToken } from '../types';
-import { StarterClient } from '../network/StarterClient';
+import { getStarterClient } from '../network/client-singleton';
 import { DEFAULT_GC_TIME, DEFAULT_STALE_TIME, QUERY_KEYS } from '../types';
 
 const EMPTY_HISTORIES: History[] = [];
@@ -65,51 +64,20 @@ export interface UseHistoriesReturn {
  * TanStack Query hook that fetches a user's history list and provides
  * mutation functions for creating, updating, and deleting history entries.
  *
- * Automatically manages caching, background refetching, error state, and
- * query invalidation after successful mutations.
+ * Uses the StarterClient DI singleton (must be initialized at app startup).
  *
- * The query is disabled when `userId` or `token` is `null`, or when
- * `options.enabled` is `false`.
- *
- * @param networkClient - A {@link NetworkClient} implementation for HTTP requests
- * @param baseUrl - The base URL of the Starter API
  * @param userId - The Firebase UID of the user, or `null` if not authenticated
  * @param token - A valid Firebase ID token, or `null` if not authenticated
  * @param options - Optional configuration
  * @param options.enabled - Whether the query should execute (default: `true`)
  * @returns An object containing histories data, loading state, error, update, and mutation functions
- *
- * @example
- * ```typescript
- * import { useHistories } from '@sudobility/genuivo_client';
- *
- * function HistoryList() {
- *   const { histories, isLoading, error, createHistory } = useHistories(
- *     networkClient,
- *     'https://api.example.com',
- *     userId,
- *     idToken
- *   );
- *
- *   if (isLoading) return <Loading />;
- *   if (error) return <Error message={error} />;
- *   return <List items={histories} />;
- * }
- * ```
  */
 export const useHistories = (
-  networkClient: NetworkClient,
-  baseUrl: string,
   userId: string | null,
   token: FirebaseIdToken | null,
   options?: { enabled?: boolean }
 ): UseHistoriesReturn => {
   const enabled = (options?.enabled ?? true) && !!userId && !!token;
-
-  const client = useMemo(
-    () => new StarterClient({ baseUrl, networkClient }),
-    [baseUrl, networkClient]
-  );
 
   const queryClient = useQueryClient();
 
@@ -121,7 +89,7 @@ export const useHistories = (
   } = useQuery({
     queryKey: QUERY_KEYS.histories(userId ?? ''),
     queryFn: async () => {
-      const response = await client.getHistories(userId!, token!);
+      const response = await getStarterClient().getHistories(userId!, token!);
       if (!response.success || !response.data) {
         throw new Error(response.error || 'Failed to fetch histories');
       }
@@ -145,7 +113,7 @@ export const useHistories = (
 
   const createMutation = useMutation({
     mutationFn: async (data: HistoryCreateRequest) => {
-      return client.createHistory(userId!, data, token!);
+      return getStarterClient().createHistory(userId!, data, token!);
     },
     onSuccess: response => {
       if (response.success) invalidate();
@@ -160,7 +128,7 @@ export const useHistories = (
       historyId: string;
       data: HistoryUpdateRequest;
     }) => {
-      return client.updateHistory(userId!, historyId, data, token!);
+      return getStarterClient().updateHistory(userId!, historyId, data, token!);
     },
     onSuccess: response => {
       if (response.success) invalidate();
@@ -169,7 +137,7 @@ export const useHistories = (
 
   const deleteMutation = useMutation({
     mutationFn: async (historyId: string) => {
-      return client.deleteHistory(userId!, historyId, token!);
+      return getStarterClient().deleteHistory(userId!, historyId, token!);
     },
     onSuccess: response => {
       if (response.success) invalidate();

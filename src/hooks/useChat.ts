@@ -1,14 +1,13 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import type {
   BaseResponse,
   ChatRequest,
   ChatResponse,
-  NetworkClient,
   Optional,
 } from '@sudobility/genuivo_types';
 import type { FirebaseIdToken } from '../types';
-import { StarterClient } from '../network/StarterClient';
+import { getStarterClient } from '../network/client-singleton';
 
 /**
  * Return type for the {@link useChat} hook.
@@ -28,30 +27,22 @@ export interface UseChatReturn {
  * TanStack Query mutation hook for sending chat requests to the AI endpoint.
  *
  * The mutation is disabled when `userId` or `token` is `null`.
+ * Uses the StarterClient DI singleton (must be initialized at app startup).
  *
- * @param networkClient - A {@link NetworkClient} implementation for HTTP requests
- * @param baseUrl - The base URL of the API
  * @param userId - The Firebase UID of the user, or `null` if not authenticated
  * @param token - A valid Firebase ID token, or `null` if not authenticated
  * @returns An object containing the chat function, loading state, and error
  */
 export function useChat(
-  networkClient: NetworkClient,
-  baseUrl: string,
   userId: Optional<string>,
   token: Optional<FirebaseIdToken>
 ): UseChatReturn {
-  const client = useMemo(
-    () => new StarterClient({ baseUrl, networkClient }),
-    [baseUrl, networkClient]
-  );
-
   const mutation = useMutation<BaseResponse<ChatResponse>, Error, ChatRequest>({
     mutationFn: async (data: ChatRequest) => {
       if (!userId || !token) {
         throw new Error('Not authenticated');
       }
-      return client.chat(userId, data, token);
+      return getStarterClient().chat(userId, data, token);
     },
   });
 
