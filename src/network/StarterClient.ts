@@ -16,8 +16,6 @@ import {
   createHeaders,
 } from '../utils/starter-helpers';
 
-const CHAT_TIMEOUT_MS = 120000;
-
 /**
  * Validates that a response from the API conforms to the expected {@link BaseResponse} shape.
  *
@@ -169,7 +167,6 @@ export class StarterClient {
     const url = buildUrl(this.baseUrl, `/api/v1/users/${userId}/histories`);
     const response = await this.networkClient.post(url, data, {
       headers: createAuthHeaders(token),
-      timeout: CHAT_TIMEOUT_MS,
     });
     return validateResponse<History>(response.data, 'createHistory');
   }
@@ -258,7 +255,6 @@ export class StarterClient {
     const url = buildUrl(this.baseUrl, `/api/v1/users/${userId}/chat`);
     const response = await this.networkClient.post(url, data, {
       headers: createAuthHeaders(token),
-      timeout: CHAT_TIMEOUT_MS,
     });
     return validateResponse<ChatResponse>(response.data, 'chat');
   }

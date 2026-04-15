@@ -138,7 +138,7 @@ describe('StarterClient', () => {
   });
 
   describe('chat', () => {
-    it('should call POST with correct URL and timeout', async () => {
+    it('should call POST with correct URL', async () => {
       const data = { request: 'Build a dashboard' };
       await client.chat('user-123', data, 'token-abc');
       expect(mockNetworkClient.post).toHaveBeenCalledWith(
@@ -148,7 +148,6 @@ describe('StarterClient', () => {
           headers: expect.objectContaining({
             Authorization: 'Bearer token-abc',
           }),
-          timeout: 120000,
         })
       );
     });
