@@ -1,6 +1,6 @@
 {
   "name": "@sudobility/genuivo_client",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "description": "Client library for Starter API with TanStack Query hooks",
   "type": "module",
   "main": "dist/index.js",

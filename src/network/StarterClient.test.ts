@@ -137,6 +137,23 @@ describe('StarterClient', () => {
     });
   });
 
+  describe('chat', () => {
+    it('should call POST with correct URL and timeout', async () => {
+      const data = { request: 'Build a dashboard' };
+      await client.chat('user-123', data, 'token-abc');
+      expect(mockNetworkClient.post).toHaveBeenCalledWith(
+        'https://api.example.com/api/v1/users/user-123/chat',
+        data,
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: 'Bearer token-abc',
+          }),
+          timeout: 120000,
+        })
+      );
+    });
+  });
+
   describe('getHistoriesTotal', () => {
     it('should call GET with correct URL without auth', async () => {
       await client.getHistoriesTotal();
