@@ -250,22 +250,22 @@ export class StarterClient {
 
   /**
    * Sends a chat request to the AI endpoint.
+   * Auth is optional — if a token is provided, web search is enabled.
    *
-   * @param userId - The Firebase UID of the user
    * @param data - The chat request containing the user's message
-   * @param token - A valid Firebase ID token for authentication
+   * @param token - Optional Firebase ID token for authentication (enables web search)
    * @returns The AI response (GenUI IRenderable) wrapped in a {@link BaseResponse}
    * @throws {Error} If the response does not match the expected shape
    */
   async chat(
-    userId: string,
     data: ChatRequest,
-    token: FirebaseIdToken,
+    token?: FirebaseIdToken | null,
     options?: { timeout?: number }
   ): Promise<BaseResponse<ChatResponse>> {
-    const url = buildUrl(this.baseUrl, `/api/v1/users/${userId}/chat`);
+    const url = buildUrl(this.baseUrl, '/api/v1/chat');
+    const headers = token ? createAuthHeaders(token) : undefined;
     const response = await this.networkClient.post(url, data, {
-      headers: createAuthHeaders(token),
+      headers,
       timeout: options?.timeout,
     });
     return validateResponse<ChatResponse>(response.data, 'chat');

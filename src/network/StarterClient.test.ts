@@ -138,16 +138,28 @@ describe('StarterClient', () => {
   });
 
   describe('chat', () => {
-    it('should call POST with correct URL', async () => {
+    it('should call POST with correct URL and auth header when token provided', async () => {
       const data = { request: 'Build a dashboard' };
-      await client.chat('user-123', data, 'token-abc');
+      await client.chat(data, 'token-abc');
       expect(mockNetworkClient.post).toHaveBeenCalledWith(
-        'https://api.example.com/api/v1/users/user-123/chat',
+        'https://api.example.com/api/v1/chat',
         data,
         expect.objectContaining({
           headers: expect.objectContaining({
             Authorization: 'Bearer token-abc',
           }),
+        })
+      );
+    });
+
+    it('should call POST without auth header when no token', async () => {
+      const data = { request: 'Build a dashboard' };
+      await client.chat(data);
+      expect(mockNetworkClient.post).toHaveBeenCalledWith(
+        'https://api.example.com/api/v1/chat',
+        data,
+        expect.objectContaining({
+          headers: undefined,
         })
       );
     });

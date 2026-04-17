@@ -26,23 +26,20 @@ export interface UseChatReturn {
 /**
  * TanStack Query mutation hook for sending chat requests to the AI endpoint.
  *
- * The mutation is disabled when `userId` or `token` is `null`.
- * Uses the StarterClient DI singleton (must be initialized at app startup).
+ * Works for both authenticated and unauthenticated users. When a token is
+ * provided, the server enables web search. Without a token, basic chat
+ * still works but without web search.
  *
- * @param userId - The Firebase UID of the user, or `null` if not authenticated
  * @param token - A valid Firebase ID token, or `null` if not authenticated
  * @returns An object containing the chat function, loading state, and error
  */
 export function useChat(
-  userId: Optional<string>,
+  _userId: Optional<string>,
   token: Optional<FirebaseIdToken>
 ): UseChatReturn {
   const mutation = useMutation<BaseResponse<ChatResponse>, Error, ChatRequest>({
     mutationFn: async (data: ChatRequest) => {
-      if (!userId || !token) {
-        throw new Error('Not authenticated');
-      }
-      return getStarterClient().chat(userId, data, token);
+      return getStarterClient().chat(data, token);
     },
   });
 
