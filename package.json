@@ -1,6 +1,6 @@
 {
   "name": "@sudobility/genuivo_client",
-  "version": "0.0.32",
+  "version": "0.0.33",
   "description": "Client library for Starter API with TanStack Query hooks",
   "type": "module",
   "main": "dist/index.js",
@@ -35,7 +35,7 @@
   "author": "Sudobility",
   "license": "BUSL-1.1",
   "peerDependencies": {
-    "@sudobility/genui_types": "^0.0.4",
+    "@sudobility/genui_types": "^0.0.5",
     "@sudobility/types": "^1.9.76",
     "@tanstack/react-query": ">=5.0.0",
     "react": ">=18.0.0"
